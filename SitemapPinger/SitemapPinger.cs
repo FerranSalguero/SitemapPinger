@@ -59,7 +59,7 @@ namespace WebsitePinger
                                 //log to logentries...
                                 throw new Exception("Error downloading page: " + urlToPing.loc, exc);
                             }
-                            Thread.Sleep(6000);
+                            Thread.Sleep(30*1000);
                         }
                     }
                 }
