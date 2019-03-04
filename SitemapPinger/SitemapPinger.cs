@@ -16,7 +16,8 @@ namespace WebsitePinger
         public SitemapPinger()
         {
             string[] urls = new string[] {
-                "https://whereshouldibuy.apphb.com/sitemap/index"
+                "https://whereshouldibuy.apphb.com/sitemap/index",
+                "https://whereshouldibuyineurope.apphb.com/sitemap/index"
             };
 
             Console.WriteLine("starting at " + DateTime.UtcNow.ToShortTimeString());
