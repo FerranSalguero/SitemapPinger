@@ -9,11 +9,14 @@ using WebsitePinger.Models;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace WebsitePinger
 {
     public class SitemapPinger
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public SitemapPinger()
         {
             string[] urls = new string[] {
@@ -21,7 +24,7 @@ namespace WebsitePinger
                 "https://whereshouldibuyineurope.apphb.com/sitemap/index"
             };
 
-            Console.WriteLine("starting at " + DateTime.UtcNow.ToShortTimeString());
+            logger.Info("starting at " + DateTime.UtcNow.ToShortTimeString());
 
 
             //client.Headers["user-agent"] = "Mozilla/5.0 (compatible; Pingerbot/0.1)";
@@ -35,7 +38,7 @@ namespace WebsitePinger
 
             Task.WaitAll(list.ToArray());
 
-            Console.WriteLine("ended at " + DateTime.UtcNow.ToShortTimeString());
+            logger.Info("ended at " + DateTime.UtcNow.ToShortTimeString());
 
         }
 
@@ -51,7 +54,7 @@ namespace WebsitePinger
                     index = (SitemapIndex)s.Deserialize(await reader.Content.ReadAsStreamAsync());
                 }
 
-                Console.WriteLine("sitemaps to ping -> " + index.Sitemaps.Count);
+                logger.Info("sitemaps to ping -> " + index.Sitemaps.Count);
 
                 foreach (var sitemap in index.Sitemaps)
                 {
@@ -62,18 +65,18 @@ namespace WebsitePinger
                         urlSet = (UrlSet)s.Deserialize(await reader.Content.ReadAsStreamAsync());
                     }
 
-                    Console.WriteLine("Urls to ping -> " + urlSet.Urls.Count);
+                    logger.Info("Urls to ping -> " + urlSet.Urls.Count);
 
                     foreach (var urlToPing in urlSet.Urls)
                     {
-                        Console.WriteLine("Pinging " + urlToPing.loc);
+                        logger.Info("Pinging " + urlToPing.loc);
                         try
                         {
                             await client.GetAsync(new Uri(urlToPing.loc));
                         }
                         catch (Exception exc)
                         {
-                            //log to logentries...
+                            logger.Error(exc, $"Error downloading page: {urlToPing.loc}");
                             throw new Exception("Error downloading page: " + urlToPing.loc, exc);
                         }
                         Thread.Sleep(30 * 1000);
