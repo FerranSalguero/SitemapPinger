@@ -14,13 +14,13 @@ Steps:
 3. Create a new application
 4. Connect it to your repository
 5. Modify the url list with your own and push the changes to your repository, AppHarbor will then deploy your last commit
+6. Change application insights key with your own
 
 That's all!
 
 
 ###TODO
 
-* Log data, use NLog and config Logentries in web.config
 * Get feedback on offline urls
 * Implement IOC
 
