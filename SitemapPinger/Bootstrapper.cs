@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +13,17 @@ namespace WebsitePinger
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         static int Main(string[] args)
-        {
-            // TODO: use IOC
+        { 
 
-            try {
-            new SitemapPinger();
+            TelemetryConfiguration config = TelemetryConfiguration.Active;
+            var client = new TelemetryClient();
+            client.TrackTrace($"Hello from {Environment.MachineName}");
+
+            try
+            {
+                new SitemapPinger();
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 logger.Error(exc, "Error general");
             }
