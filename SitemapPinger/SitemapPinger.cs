@@ -43,6 +43,8 @@ namespace WebsitePinger
         {
             using (var client = new PingerWebClient("Mozilla/5.0 (compatible; Pingerbot/0.2)"))
             {
+                client.Timeout = TimeSpan.FromSeconds(30);
+
                 SitemapIndex index = null;
                 using (var reader = await client.GetAsync(url))
                 {
