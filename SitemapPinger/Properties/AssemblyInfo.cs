@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("website-pinger")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("T-SYSTEMS")]
-[assembly: AssemblyProduct("website-pinger")]
-[assembly: AssemblyCopyright("Copyright © T-SYSTEMS 2013")]
+[assembly: AssemblyCompany("Ferran Salguero")]
+[assembly: AssemblyProduct("CompareInt")]
+[assembly: AssemblyCopyright("Copyright © Ferran Salguero 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
