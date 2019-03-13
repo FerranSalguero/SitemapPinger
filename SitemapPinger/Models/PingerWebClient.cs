@@ -16,6 +16,7 @@ namespace WebsitePinger.Models
         public PingerWebClient(string userAgent)
         {
             this.UserAgent = userAgent;
+            this.Timeout = TimeSpan.FromSeconds(30);
         }
 
     }

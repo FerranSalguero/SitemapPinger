@@ -17,13 +17,21 @@ namespace WebsitePinger
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
+        public string[] Urls { get; set; }
+
         public SitemapPinger()
         {
-            string[] urls = new string[] {
+            Urls = new string[] {
                 "https://whereshouldibuy.apphb.com/sitemap/index",
                 "https://whereshouldibuyineurope.apphb.com/sitemap/index"
             };
 
+            
+
+        }
+
+        internal async Task Run()
+        {
             logger.Info("starting at " + DateTime.UtcNow.ToShortTimeString());
 
 
@@ -31,15 +39,14 @@ namespace WebsitePinger
             //client.Proxy = new WebProxy("http://10.49.1.1:8080");
 
             var list = new List<Task>();
-            foreach (var url in urls)
+            foreach (var url in Urls)
             {
-                list.Add(DoPing(url));
+                list.Add(DoPing(url).LogExceptions());
             }
 
-            Task.WaitAll(list.ToArray());
+            await Task.WhenAll(list.ToArray());
 
             logger.Info("ended at " + DateTime.UtcNow.ToShortTimeString());
-
         }
 
         private async Task DoPing(string url)
@@ -49,11 +56,20 @@ namespace WebsitePinger
                 using (var client = new PingerWebClient("Mozilla/5.0 (compatible; Pingerbot/0.2)"))
                 {
                     SitemapIndex index = null;
-                    using (var reader = await client.GetAsync(url))
+                    try
                     {
-                        var s = new XmlSerializer(typeof(SitemapIndex));
+                        using (var reader = await client.GetAsync(url))
+                        {
+                            var s = new XmlSerializer(typeof(SitemapIndex));
 
-                        index = (SitemapIndex)s.Deserialize(await reader.Content.ReadAsStreamAsync());
+                            index = (SitemapIndex)s.Deserialize(await reader.Content.ReadAsStreamAsync());
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        logger.Error(exc, "Error on first call");
+                        await Task.Delay(30 * 1000);
+                        continue;
                     }
 
                     logger.Info("sitemaps to ping -> " + index.Sitemaps.Count);
@@ -81,7 +97,7 @@ namespace WebsitePinger
                                 logger.Error(exc, $"Error downloading page: {urlToPing.loc}");
                                 //throw new Exception("Error downloading page: " + urlToPing.loc, exc);
                             }
-                            Thread.Sleep(30 * 1000);
+                            await Task.Delay(30 * 1000);
                         }
                     }
                 }

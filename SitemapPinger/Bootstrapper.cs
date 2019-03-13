@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebsitePinger
 {
@@ -12,7 +13,7 @@ namespace WebsitePinger
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         { 
 
             TelemetryConfiguration config = TelemetryConfiguration.Active;
@@ -21,7 +22,7 @@ namespace WebsitePinger
 
             try
             {
-                new SitemapPinger();
+                await new SitemapPinger().Run();
             }
             catch (Exception exc)
             {
