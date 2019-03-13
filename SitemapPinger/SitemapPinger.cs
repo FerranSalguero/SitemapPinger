@@ -9,11 +9,14 @@ using WebsitePinger.Models;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace WebsitePinger
 {
     public class SitemapPinger
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public SitemapPinger()
         {
             string[] urls = new string[] {
@@ -21,7 +24,7 @@ namespace WebsitePinger
                 "https://whereshouldibuyineurope.apphb.com/sitemap/index"
             };
 
-            Console.WriteLine("starting at " + DateTime.UtcNow.ToShortTimeString());
+            logger.Info("starting at " + DateTime.UtcNow.ToShortTimeString());
 
 
             //client.Headers["user-agent"] = "Mozilla/5.0 (compatible; Pingerbot/0.1)";
@@ -35,53 +38,54 @@ namespace WebsitePinger
 
             Task.WaitAll(list.ToArray());
 
-            Console.WriteLine("ended at " + DateTime.UtcNow.ToShortTimeString());
+            logger.Info("ended at " + DateTime.UtcNow.ToShortTimeString());
 
         }
 
         private async Task DoPing(string url)
         {
-            using (var client = new PingerWebClient("Mozilla/5.0 (compatible; Pingerbot/0.2)"))
+            do
             {
-                client.Timeout = TimeSpan.FromSeconds(30);
-
-                SitemapIndex index = null;
-                using (var reader = await client.GetAsync(url))
+                using (var client = new PingerWebClient("Mozilla/5.0 (compatible; Pingerbot/0.2)"))
                 {
-                    var s = new XmlSerializer(typeof(SitemapIndex));
-
-                    index = (SitemapIndex)s.Deserialize(await reader.Content.ReadAsStreamAsync());
-                }
-
-                Console.WriteLine("sitemaps to ping -> " + index.Sitemaps.Count);
-
-                foreach (var sitemap in index.Sitemaps)
-                {
-                    UrlSet urlSet = null;
-                    using (var reader = await client.GetAsync(sitemap.loc))
+                    SitemapIndex index = null;
+                    using (var reader = await client.GetAsync(url))
                     {
-                        var s = new XmlSerializer(typeof(UrlSet));
-                        urlSet = (UrlSet)s.Deserialize(await reader.Content.ReadAsStreamAsync());
+                        var s = new XmlSerializer(typeof(SitemapIndex));
+
+                        index = (SitemapIndex)s.Deserialize(await reader.Content.ReadAsStreamAsync());
                     }
 
-                    Console.WriteLine("Urls to ping -> " + urlSet.Urls.Count);
+                    logger.Info("sitemaps to ping -> " + index.Sitemaps.Count);
 
-                    foreach (var urlToPing in urlSet.Urls)
+                    foreach (var sitemap in index.Sitemaps)
                     {
-                        Console.WriteLine("Pinging " + urlToPing.loc);
-                        try
+                        UrlSet urlSet = null;
+                        using (var reader = await client.GetAsync(sitemap.loc))
                         {
-                            await client.GetAsync(new Uri(urlToPing.loc));
+                            var s = new XmlSerializer(typeof(UrlSet));
+                            urlSet = (UrlSet)s.Deserialize(await reader.Content.ReadAsStreamAsync());
                         }
-                        catch (Exception exc)
+
+                        logger.Info("Urls to ping -> " + urlSet.Urls.Count);
+
+                        foreach (var urlToPing in urlSet.Urls)
                         {
-                            //log to logentries...
-                            throw new Exception("Error downloading page: " + urlToPing.loc, exc);
+                            logger.Info("Pinging " + urlToPing.loc);
+                            try
+                            {
+                                await client.GetAsync(new Uri(urlToPing.loc));
+                            }
+                            catch (Exception exc)
+                            {
+                                logger.Error(exc, $"Error downloading page: {urlToPing.loc}");
+                                //throw new Exception("Error downloading page: " + urlToPing.loc, exc);
+                            }
+                            Thread.Sleep(30 * 1000);
                         }
-                        Thread.Sleep(30 * 1000);
                     }
                 }
-            }
+            } while (true);
 
         }
     }
