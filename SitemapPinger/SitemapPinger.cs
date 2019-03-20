@@ -23,7 +23,6 @@ namespace WebsitePinger
         {
             Urls = new string[] {
                 "https://whereshouldibuy.apphb.com/sitemap/index",
-                "https://whereshouldibuyineurope.apphb.com/sitemap/index"
             };
 
             
