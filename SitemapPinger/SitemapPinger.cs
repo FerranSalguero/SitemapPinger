@@ -22,7 +22,7 @@ namespace WebsitePinger
         public SitemapPinger()
         {
             Urls = new string[] {
-                "https://whereshouldibuy.apphb.com/sitemap/index",
+                "https://www.havetoget.com/sitemap/index",
             };
 
             
